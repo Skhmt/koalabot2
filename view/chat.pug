@@ -1,0 +1,32 @@
+.container-fluid
+  .row
+    .col-sm-9(style="height: calc(100vh - 140px);")
+      //- chatbox
+      #chatPanel.panel.panel-default(style="height: 100%; padding: 0; overflow-y: scroll; overflow-x: hidden; word-wrap: break-word;")
+        .panel-body(style="padding: 0;")
+          .list-group
+            a.list-group-item.chatLine(v-for="line in chatLines", track-by="$index", v-html="line")
+    .col-sm-3(style="height: calc(100vh - 140px); padding-left: 5px; margin-left: 0px;")
+      //- userlist
+      .panel.panel-default(style="height: 100%;").noSelect
+        .panel-body
+          i.fa.fa-fw.fa-heart.text-danger
+          | &nbsp; &nbsp; {{ followers }}
+          br
+          i.fa.fa-fw.fa-user.text-info
+          | &nbsp; &nbsp; {{ watching }}
+          br
+          i.fa.fa-fw.fa-user-plus.text-primary
+          | &nbsp; &nbsp; {{ totalViews }}
+        .panel-body(v-html="userlist", style="overflow-y: auto; overflow-x: hidden; word-wrap: break-word;")
+  .row
+    .col-sm-12(style="height: 50px;")
+      //- Text input
+      br
+      form(v-on:submit.prevent="sendChat(selectChatBox, submitChatBox);")
+        .input-group.input-group-sm
+          .input-group-btn
+            select.btn.btn-default.noSelect(v-model="selectChatBox")
+              option(value="streamer") Streamer
+              option(value="bot") Bot
+          input.form-control.input-one#submitChatBox(type="text", placeholder="...", v-model="submitChatBox", autocomplete="off")

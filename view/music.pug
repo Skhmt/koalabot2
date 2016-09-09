@@ -1,0 +1,71 @@
+.container-fluid
+  .row
+    .col-xs-6
+      .row
+        .col-xs-12.text-center(style="text-overflow: ellipsis; overflow: hidden; width: 100%; white-space: nowrap;")
+          strong.musicColor {{ currentSong.title }}
+      .row
+        .col-xs-12
+          div(style="display: block; padding: 0; margin: 0; height: 10px;")
+      .row
+        .col-xs-12
+          iframe#ytPlayer(src="", style="border: 0; padding: 0; margin: 0; width: 100%; height: 360px;")
+      .row
+        .col-xs-12
+          #scrubContainer(style="width: 100%")
+            .progress.progress-striped.active(style="margin: 0; border-radius: 0 !important;")
+              #scrub.progress-bar.progress-bar-success
+      .row
+        .col-xs-12
+          div.musicColor(style="display: inline-block;") {{ currentTime }}
+          .pull-right.musicColor(style="display: inline-block;") {{ duration }}
+      .row
+        .col-xs-12
+          div(style="display: block; padding: 0; margin: 0; height: 20px;")
+      .row
+        .col-xs-3.text-center
+          i.fa.fa-heart.fa-fw.fa-2x.musicColor(v-on:click="favorite", style="margin-top: 85px;")
+        .col-xs-6.text-center
+          input#volKnob.musicColor(type="text", value="100")
+        .col-xs-3.text-center
+          i.fa.fa-step-forward.fa-fw.fa-2x.musicColor(v-on:click="nextSong", style="margin-top: 85px;")
+    .col-xs-6
+      .row
+        .col-xs-5
+          strong.noSelect Request queue
+        .col-xs-7
+          .input-group.input-group-sm
+            input.form-control.input-one(v-model="requestInput", placeholder="youtube video id")
+            .input-group-btn
+              button.btn.btn-default.noSelect(v-on:click="addRequest")
+                i.fa.fa-plus
+              button.btn.btn-default.noSelect(v-on:click="shuffleRequest")
+                i.fa.fa-random
+      .row
+        .col-xs-12
+          .panel.panel-default(style="height: calc(50vh - 95px); overflow-y: scroll; overflow-x: hidden; word-wrap: break-word;")
+            transition-group.list-group(name="streamerQueue", tag="ul")
+              li.streamerQueue.list-group-item(v-for="request in requestQueue", v-bind:key="request.id")
+                i.fa.fa-times-circle.fa-lg.text-danger(v-on:click="removeRequest(request.id)")
+                | &nbsp;&nbsp;&nbsp;
+                em {{request.title}}
+      .row
+        .col-xs-5
+          strong.noSelect Streamer queue
+        .col-xs-7
+          .input-group.input-group-sm
+            input.form-control.input-one(v-model="streamerInput", placeholder="youtube video id")
+            .input-group-btn
+              button.btn.btn-default.noSelect(v-on:click="addStreamer")
+                i.fa.fa-plus
+              button.btn.btn-default.noSelect(v-on:click="shuffleStreamer")
+                i.fa.fa-random
+      .row
+        .col-xs-12
+          .panel.panel-default(style="height: calc(50vh - 95px); overflow-y: scroll; overflow-x: hidden; word-wrap: break-word;")
+            transition-group.list-group(name="streamerQueue", tag="ul")
+              li.streamerQueue.list-group-item(v-for="song in streamerQueue", v-bind:key="song.id")
+                //- button.btn.btn-sm.btn-danger(v-on:click="removeStreamer(song.id)")
+                i.fa.fa-times-circle.fa-lg.text-danger(v-on:click="removeStreamer(song.id)")
+                | &nbsp;&nbsp;&nbsp;
+                em {{song.title}}

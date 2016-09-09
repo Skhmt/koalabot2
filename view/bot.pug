@@ -1,0 +1,19 @@
+.fillWindow
+  nav.navbar.navbar-default.noSelect
+    ul.nav.navbar-nav
+      li(v-for="item in navItems", v-bind:class="isTab(item.name) ? 'active' : ''")
+        a(v-on:click="changeTab(item.name)")
+          i.fa.fa-fw.fa-lg(v-bind:class="item.icon", v-show="iconNav")
+          span(v-show="!iconNav") {{item.name}}
+    //- ul.nav.navbar-nav
+    //-   li
+    //-     a(v-on:click="iconNav = !iconNav")
+    //-       i.fa.fa-fw.fa-lg.fa-font(v-show="iconNav")
+    //-       span(v-show="!iconNav") Toggle Icons
+  .container-fluid(style="height: calc(100vh - 90px); text-wrap: break-word; overflow-x: hidden;")
+    transition(v-on:before-enter="fadeBeforeEnter", v-on:enter="fadeEnter", v-on:leave="fadeLeave", v-bind:css="false")
+      chat(v-show="currTab === 'Chat'")
+    transition(v-on:before-enter="fadeBeforeEnter", v-on:enter="fadeEnter", v-on:leave="fadeLeave", v-bind:css="false")
+      music(v-show="currTab === 'Music'")
+    transition(v-on:before-enter="fadeBeforeEnter", v-on:enter="fadeEnter", v-on:leave="fadeLeave", v-bind:css="false")
+      points(v-show="currTab === 'Points'")

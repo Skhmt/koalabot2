@@ -1,0 +1,19 @@
+{
+	"name": "KoalaBot",
+	"description": "A twitch chat bot",
+	"version": "2.0.0-alpha1",
+	"main": "app.html",
+	"dependencies": {
+		"express": "4.14.0",
+		"body-parser": "1.14.2",
+		"ws": "1.1.0",
+    "pug": "2.0.0-beta3"
+	},
+	"window": {
+		"min_width": 1000,
+		"min_height": 750,
+		"title": "KoalaBot",
+		"icon": "img/kb.png",
+		"frame": true
+	}
+}
