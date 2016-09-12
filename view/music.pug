@@ -43,7 +43,7 @@
                 i.fa.fa-random
       .row
         .col-xs-12
-          .panel.panel-default(style="height: calc(50vh - 95px); overflow-y: scroll; overflow-x: hidden; word-wrap: break-word;")
+          .panel.panel-default(style="height: calc(50vh - 86px); overflow-y: scroll; overflow-x: hidden; word-wrap: break-word;")
             transition-group.list-group(name="streamerQueue", tag="ul")
               li.streamerQueue.list-group-item(v-for="request in requestQueue", v-bind:key="request.id")
                 i.fa.fa-times-circle.fa-lg.text-danger(v-on:click="removeRequest(request.id)")
@@ -62,7 +62,7 @@
                 i.fa.fa-random
       .row
         .col-xs-12
-          .panel.panel-default(style="height: calc(50vh - 95px); overflow-y: scroll; overflow-x: hidden; word-wrap: break-word;")
+          .panel.panel-default(style="height: calc(50vh - 86px); overflow-y: scroll; overflow-x: hidden; word-wrap: break-word; margin-bottom: 0;")
             transition-group.list-group(name="streamerQueue", tag="ul")
               li.streamerQueue.list-group-item(v-for="song in streamerQueue", v-bind:key="song.id")
                 //- button.btn.btn-sm.btn-danger(v-on:click="removeStreamer(song.id)")

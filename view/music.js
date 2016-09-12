@@ -8,7 +8,6 @@
 */
 
 module.exports = function(Vue, $){
-  let ytAPIkey = 'AIzaSyDHIEtPmB3cOp2nHFA9T2LAz-xcfXyZJ2A';
   let ytPlayer;
 
   let data = {
@@ -77,6 +76,36 @@ module.exports = function(Vue, $){
     return leadingMinutesZero + minutes + ':' + leadingSecondsZero + seconds;
   }
 
+  function getYoutubeTitle(id, fn) {
+    $.ajax({
+      url: 'https://www.youtube.com/embed/' + id,
+      complete: function(data) {
+        // var re = /<title>(.+?) - YouTube<\/title>/gi;
+        // var match = re.exec(data.responseText);
+        // if (match && match[1]) fn(match[1]);
+        fn( data.responseText.split('<title>')[1].split(' - YouTube</title>')[0] )
+      }
+    });
+  }
+
+  function sanitizeYT(url) {
+    // youtube.com/attribution_link?a=JZ6nOJ4SvBc&u=/watch%3Fv%3D[id]%26feature%3Dem-share_video_user
+    if (url.includes('u=')) {
+      const queries = url.split('?')[1].split('&');
+      for (let i = 0; i < queries.length; i++) {
+        const query = queries[i].split('=');
+        if (query[0] == 'u') return decodeURIComponent(query[1]).split('v=')[1].substring(0,11);
+      }
+    }
+    // youtube.com/watch?v=[id]&t=1m1s, attribution_link continued
+    else if (url.includes('v=')) return url.split('v=')[1].substring(0,11);
+    // youtu.be/[id]?t=1m1s, youtube.com/v/[id], youtube.com/embed/[id]?autoplay=1
+    else {
+      const splitURL = url.split('/');
+      return splitURL[splitURL.length-1].split('?')[0];
+    }
+  }
+
   let tapicStreamer = require('../lib/tapic-streamer.js');
   tapicStreamer.listen('join', initMusic);
   function initMusic(name) {
@@ -143,16 +172,6 @@ module.exports = function(Vue, $){
     }
   }
 
-  function sanitizeYT(url) {
-    return url.replace('https://', '')
-      .replace('http://', '')
-      .replace('youtu.be/', '')
-      .replace('www.youtube.com/watch?v=', '')
-      .replace('m.youtube.com/watch?v=', '')
-      .split('&')[0]
-      .split('?')[0];
-  }
-
   function addSongStreamer(videoid) {
     // allows most copy-pastes to work
     if ( videoid.length != 11 ) {
@@ -172,32 +191,18 @@ module.exports = function(Vue, $){
       return;
     }
 
-    $.getJSON(
-      'https://www.googleapis.com/youtube/v3/videos',
-      {
+    getYoutubeTitle(videoid, function (title) {
+      let pushObj = {
         id: videoid,
-        part: 'snippet',
-        key: ytAPIkey
-      },
-      function( response ) {
-        if (response.pageInfo.totalResults == 0) {
-          // cmdSay( "Error, invalid youtube video." );
-        }
-        else {
-          let videotitle = response.items[0].snippet.title;
-          let pushObj = {
-            id: videoid,
-            title: videotitle,
-          };
-          data.streamerQueue.push(pushObj);
-          // log( `* "${videotitle}" added to the streamer song queue.` );
+        title: title,
+      };
+      data.streamerQueue.push(pushObj);
+      // log( `* "${videotitle}" added to the streamer song queue.` );
 
-          // If after adding a song, the player isn't playing, start it
-          let state = ytPlayer.getPlayerState();
-          if (state !== 1 && state !== 2) nextSong();
-        }
-      }
-    );
+      // If after adding a song, the player isn't playing, start it
+      let state = ytPlayer.getPlayerState();
+      if (state !== 1 && state !== 2) nextSong();
+    });
   }
 
   function addSongRequest(videoid, username) {
@@ -219,34 +224,19 @@ module.exports = function(Vue, $){
       return;
     }
 
-    $.getJSON(
-      'https://www.googleapis.com/youtube/v3/videos',
-      {
+    getYoutubeTitle(videoid, function (title) {
+      let pushObj = {
         id: videoid,
-        part: 'snippet',
-        key: ytAPIkey
-      },
-      function( response ) {
-        if ( response.pageInfo.totalResults == 0 ) {
-          // cmdSay( "Error, invalid youtube video." );
-        }
-        else {
-          let videotitle = response.items[0].snippet.title;
+        title: title,
+        user: username,
+      };
+      data.requestQueue.push(pushObj);
+      // cmdSay( `"${videotitle}" added to the queue by ${username}` );
 
-          let pushObj = {
-            id: videoid,
-            title: videotitle,
-            user: username,
-          };
-          data.requestQueue.push(pushObj);
-          // cmdSay( `"${videotitle}" added to the queue by ${username}` );
-
-          // If after adding a song, the player isn't playing, start it
-          let state = ytPlayer.getPlayerState();
-          if (state !== 1 && state !== 2) nextSong();
-        }
-      }
-    );
+      // If after adding a song, the player isn't playing, start it
+      let state = ytPlayer.getPlayerState();
+      if (state !== 1 && state !== 2) nextSong();
+    });
   }
 
   function toggleMute() {
