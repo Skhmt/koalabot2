@@ -1,0 +1,4 @@
+# development notes and such
+/_dev/*
+# modules
+/node_modules/*
