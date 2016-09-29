@@ -5,9 +5,9 @@
 
 module.exports = function(Vue, $){
 
-  require('./chat.js')(Vue, $);
-  require('./music.js')(Vue, $);
-  require('./points.js')(Vue, $);
+  require('./chat.js')(Vue, $)
+  require('./music.js')(Vue, $)
+  require('./points.js')(Vue, $)
 
   let data = {
     navItems: [
@@ -26,7 +26,7 @@ module.exports = function(Vue, $){
     ],
     currTab: 'Chat',
     iconNav: true,
-  };
+  }
 
 
   Vue.component('bot', {
@@ -34,21 +34,21 @@ module.exports = function(Vue, $){
     data: function () { return data; },
     methods: {
       isTab: function(name) {
-        return this.currTab === name;
+        return this.currTab === name
       },
       changeTab: function (name) {
-        this.currTab = name;
+        this.currTab = name
       },
       fadeBeforeEnter: function (el) {
-        $(el).velocity('fadeOut', {duration: 0});
+        $(el).velocity('fadeOut', {duration: 0})
       },
       fadeEnter: function (el, done) {
-        $(el).velocity('transition.fadeIn', {delay: 180, duration: 160}, done);
+        $(el).velocity('transition.fadeIn', {delay: 180, duration: 160}, done)
       },
       fadeLeave: function (el, done) {
-        $(el).velocity('transition.fadeOut', {duration: 160}, done);
+        $(el).velocity('transition.fadeOut', {duration: 160}, done)
       },
     } // methods
-  }); // Vue.component
+  }) // Vue.component
 
-};
+}
