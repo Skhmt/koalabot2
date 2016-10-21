@@ -3,8 +3,9 @@
   node: true
 */
 
-module.exports = function(Vue, $){
+module.exports = function(Vue){
   let store = require('../lib/store')
+  let window = store.window()
 
   let data = {
     clientidstreamer : 'odxxxgp3cpbeuqybayvhwinz8zl0paf',
@@ -13,25 +14,45 @@ module.exports = function(Vue, $){
     tapicBot : require('../lib/tapic-bot'),
     streamerName : '',
     botName : '',
-    showTwitchLogin: false,
+    streamerPicture: '',
+    botPicture: '',
+    showStreamerLogin: false,
+    showBotLogin: false,
     server: null,
     isServerSetup: false,
+    greeting: '¯\\_(ツ)_/¯',
   }
 
   store.getItem('streamerOauth', (err, res) => {
-    if (!err) getName(res, name => data.streamerName = name)
+    if (!err) {
+      getName(res, name => {
+        data.streamerName = name
+        getLogo(name, res, imgUrl => data.streamerPicture = imgUrl)
+      })
+    }
     else console.error(err)
   })
 
   store.getItem('botOauth', (err, res) => {
-    if (!err) getName(res, name => data.botName = name)
+    if (!err) {
+      getName(res, name => {
+        data.botName = name
+        getLogo(name, res, imgUrl => data.botPicture = imgUrl)
+      })
+    }
     else console.error(err)
   })
 
   function getName(oauth, callback) {
     oauth = oauth.replace('oauth:', '')
-    const url = 'https://api.twitch.tv/kraken'
-    $.getJSON(`${url}?api_version=3&oauth_token=${oauth}`, res => callback(res.token.user_name))
+    const url = `https://api.twitch.tv/kraken?api_version=3&oauth_token=${oauth}`
+    window.fetch(url).then(res => res.json()).then(res => callback(res.token.user_name))
+  }
+
+  function getLogo(username, oauth, callback) {
+    oauth = oauth.replace('oauth:', '')
+    const url = `https://api.twitch.tv/kraken/channels/${username}?api_version=3&oauth_token=${oauth}`
+    window.fetch(url).then(res => res.json()).then(res => callback(res.logo))
   }
 
   Vue.component('login', {
@@ -42,45 +63,61 @@ module.exports = function(Vue, $){
         let _this = this
         let express = require('express')
         let app = express()
-        app.use( express.static('./public') )
-        app.get( '/streamer/:token', function (req, res) {
-          _this.showTwitchLogin = false
+        app.use(express.static('./public'))
+        app.get('/streamer/:token', function (req, res) {
+          _this.showStreamerLogin = false
+          window.document.getElementById('streamerLoginFrame').src = ''
           let oauth = req.params.token
           res.send('OK')
           store.setItem('streamerOauth', oauth)
-          getName(oauth, name => _this.streamerName = name)
-        } )
-        app.get( '/bot/:token', function (req, res) {
-          _this.showTwitchLogin = false
+          getName(oauth, name => {
+            _this.streamerName = name
+            getLogo(name, oauth, imgUrl => _this.streamerPicture = imgUrl)
+          })
+
+        })
+        app.get('/bot/:token', function (req, res) {
+          _this.showBotLogin = false
+          window.document.getElementById('botLoginFrame').src = ''
           let oauth = req.params.token
           res.send('OK')
           store.setItem('botOauth', oauth)
-          getName(oauth, name => _this.botName = name)
-        } )
-        app.get( '/cancel/', function(req, res) {
-          _this.showTwitchLogin = false
+          getName(oauth, name => {
+            _this.botName = name
+            getLogo(name, oauth, imgUrl => _this.botPicture = imgUrl)
+          })
+        })
+        app.get('/cancel/', function(req, res) {
+          _this.showStreamerLogin = false
+          _this.showBotLogin = false
           res.send('OK')
-        } )
+        })
         this.server = app.listen( 3000 )
         this.isServerSetup = true
       },
       streamerLogin: function () {
         if (!this.isServerSetup) this.serverSetup()
 
-        this.showTwitchLogin = true
-        const url = 'https://api.twitch.tv/kraken/oauth2/authorize'
+        const path = 'https://api.twitch.tv/kraken/oauth2/authorize'
         const scope = 'channel_editor+chat_login+channel_commercial+channel_subscriptions+channel_check_subscription'
         const redirect_uri = 'http://localhost:3000/streamer.html'
-        $('#twitchLoginFrame').attr('src', `${url}?response_type=token&client_id=${this.clientidstreamer}&redirect_uri=${redirect_uri}&scope=${scope}&force_verify=true`)
+        const url = `${path}?response_type=token&client_id=${this.clientidstreamer}&redirect_uri=${redirect_uri}&scope=${scope}&force_verify=true`
+
+        let $login = window.document.getElementById('streamerLoginFrame')
+        if ($login.src != url) $login.src = url
+        this.showStreamerLogin = true
       },
       botLogin: function() {
         if (!this.isServerSetup) this.serverSetup();
 
-        this.showTwitchLogin = true
-        const url = 'https://api.twitch.tv/kraken/oauth2/authorize'
+        const path = 'https://api.twitch.tv/kraken/oauth2/authorize'
         const scope = 'channel_editor+chat_login+channel_commercial'
         const redirect_uri = 'http://localhost:3000/bot.html'
-        $('#twitchLoginFrame').attr('src', `${url}?response_type=token&client_id=${this.clientidbot}&redirect_uri=${redirect_uri}&scope=${scope}&force_verify=true`)
+        const url = `${path}?response_type=token&client_id=${this.clientidbot}&redirect_uri=${redirect_uri}&scope=${scope}&force_verify=true`;
+
+        let $login = window.document.getElementById('botLoginFrame');
+        if ($login.src != url) $login.src = url
+        this.showBotLogin = true
       },
       login: function (streamerName, botName) {
         let _this = this
@@ -119,14 +156,14 @@ module.exports = function(Vue, $){
       andand: function (one, two) {
         return (one && two)
       },
-      slideRightBigBeforeEnter: function (el) {
-        $(el).velocity('fadeOut', {duration: 0})
+      fadeBeforeEnter: function (el) {
+        window.Velocity(el, 'fadeOut', {duration: 0})
       },
-      slideRightBigEnter: function (el, done) { //180, 160
-        $(el).velocity('transition.slideRightBigIn', {delay: 180, duration: 500}, done)
+      fadeEnter: function (el, done) {
+        window.Velocity(el, 'transition.fadeIn', {delay: 180, duration: 160}, done)
       },
-      slideRightBigLeave: function (el, done) { //160
-        $(el).velocity('transition.slideRightBigOut', {duration: 500}, done)
+      fadeLeave: function (el, done) {
+        window.Velocity(el, 'transition.fadeOut', {duration: 160}, done)
       },
     }, // methods
     computed: {

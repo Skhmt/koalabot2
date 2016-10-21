@@ -1,24 +1,14 @@
-/*jshint
-  esversion: 6,
-  node: true
-*/
+// basic
 
-module.exports = function(Vue, $){
+module.exports = function(Vue) {
+  let store = require('../lib/store')
+  let window = store.window()
+  let data = {}
 
-  let template = require('pug').render(`
-slot
-  `);
-
-  Vue.component('component name', {
-    template,
-    data: function () { return {
-      foo: bar
-    }; },
+  Vue.component('glass', {
+    template: require('pug').renderFile('./view/glass.pug'),
+    data: () => data,
     methods: {
-      fubar: function (x) {
-        // something
-      }
-    }
-  });
-
-};
+    },
+  })
+}

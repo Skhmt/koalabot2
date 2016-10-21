@@ -3,8 +3,10 @@
   node: true
 */
 
-module.exports = function(Vue, $){
+module.exports = function(Vue){
+  let store = require('../lib/store')
   let ytPlayer
+  let window = store.window()
 
   let data = {
     requestQueue: [],
@@ -19,7 +21,6 @@ module.exports = function(Vue, $){
     requestInput: '',
   }
 
-  let store = require('../lib/store')
   store.getItem('streamerQueue', (err, res) => {
     if (err) console.error(err)
     else if (res) data.streamerQueue = res
@@ -35,7 +36,8 @@ module.exports = function(Vue, $){
     })
   }
 
-  ;(function songStateChecker() {
+  window.requestAnimationFrame(songStateChecker)
+  function songStateChecker() {
     try {
       // unstarted: -1, ended: 0, playing: 1, paused: 2, buffering: 3, cued: 5
       const state = ytPlayer.getPlayerState()
@@ -46,12 +48,15 @@ module.exports = function(Vue, $){
       data.currentTime = secondsToMinutes(currentTime)
       data.duration = secondsToMinutes(duration)
 
-      const scrubWidth = (currentTime / duration) * $('#scrubContainer').width()
-      $('#scrub').css('width', scrubWidth+'px')
+      const scrubWidth = (currentTime / duration) * window.document.getElementById('scrubContainer').clientWidth
+      window.document.getElementById('scrub').style.width = scrubWidth + 'px'
+
+      const volWidth = ytPlayer.getVolume() * 0.01 * window.document.getElementById('volumeContainer').clientWidth
+      window.document.getElementById('volume').style.width = volWidth + 'px'
 
     } catch (e) {}
-    setTimeout(songStateChecker, 250)
-  })()
+    window.requestAnimationFrame(songStateChecker)
+  }
 
   function secondsToMinutes(totalSeconds) {
     const minutes = (totalSeconds / 60)|0
@@ -64,18 +69,13 @@ module.exports = function(Vue, $){
   }
 
   function getYoutubeTitle(id, fn) {
-    $.ajax({
-      url: 'https://www.youtube.com/embed/' + id,
-      complete: function(data) {
-        // var re = /<title>(.+?) - YouTube<\/title>/gi;
-        // var match = re.exec(data.responseText);
-        // if (match && match[1]) fn(match[1]);
-        let title = data.responseText.split('<title>')[1].split('</title>')[0]
-        if (title.includes(' - YouTube')) {
-          fn(title.split(' - YouTube')[0])
-        }
-        else fn(false)
+    let url = 'https://www.youtube.com/embed/' + id
+    fetch(url).then(res => res.text()).then(res => {
+      let title = res.split('<title>')[1].split('</title>')[0]
+      if (title.includes(' - YouTube')) {
+        fn(title.split(' - YouTube')[0])
       }
+      else fn(false)
     })
   }
 
@@ -104,44 +104,35 @@ module.exports = function(Vue, $){
   function initMusic(name) {
     if (name !== tapicStreamer.getUsername()) return ''
 
-    $('#ytPlayer').attr('src', 'http://localhost:3001/yt.html')
+    window.document.getElementById('ytPlayer').src = 'http://localhost:3001/yt.html'
 
-    ;(function setPlayer() {
-      ytPlayer = $('#ytPlayer')[0].contentWindow.ytPlayer
+    setPlayer()
+    function setPlayer() {
+      ytPlayer = window.document.getElementById('ytPlayer').contentWindow.ytPlayer
       if (ytPlayer == undefined) {
         setTimeout(setPlayer, 50)
       }
       else {
-        ytPlayer.addEventListener('onError', function (e) {
+        ytPlayer.addEventListener('onError', e => {
           console.log(`Youtube error ${e.data}`)
         })
       }
-    })()
+    }
 
-    // https://github.com/aterrien/jQuery-Knob
-    $('#volKnob').knob({
-      angleArc: 240,
-      angleOffset: 240,
-      thickness: '.25',
-      width: 200,
-      fgColor: '#98c379',
-      bgColor: '#3B3E45',
-      step: 1,
-      cursor: 2,
-      change: function (v) {
-        ytPlayer.setVolume(v);
-      },
-      release: function (v) {
-        ytPlayer.setVolume(v);
-      },
+    let $vc = window.document.getElementById('volumeContainer')
+    $vc.addEventListener('click', e => {
+      const pixelsFromLeft = e.pageX - $vc.offsetLeft
+      const containerWidth = $vc.clientWidth
+      const vol = Math.round( (pixelsFromLeft/containerWidth*100) )
+      ytPlayer.setVolume(vol)
     })
 
-    $('#scrubContainer').click(function (e) {
-      let offset = $(this).offset()
-      let pixelsFromLeft = e.pageX - offset.left
-      let containerWidth = $(this).width()
-      let scrubTimePercent = Math.round( (pixelsFromLeft/containerWidth*100) ) * 0.01
-      let scrubTime = (scrubTimePercent * ytPlayer.getDuration())|0
+    let $sc = window.document.getElementById('scrubContainer')
+    $sc.addEventListener('click', e => {
+      const pixelsFromLeft = e.pageX - $sc.offsetLeft
+      const containerWidth = $sc.clientWidth
+      const scrubTimePercent = Math.round( (pixelsFromLeft/containerWidth*100) ) * 0.01
+      const scrubTime = (scrubTimePercent * ytPlayer.getDuration())|0
       ytPlayer.seekTo(scrubTime, true)
     })
   }
@@ -160,10 +151,13 @@ module.exports = function(Vue, $){
       ytPlayer.loadVideoById(tempSong.id, 0, 'medium')
       ytPlayer.playVideo()
       data.currentSong = tempSong
-      data.streamerQueue.push( tempSong )
+      data.streamerQueue.push(tempSong)
       saveQueue()
       // fs.writeFile( `${execPath}txt/song-current.txt`, currentSong.title );
     }
+  }
+  function prevSong() {
+    ytPlayer.seekTo(0, true)
   }
 
   function addSongStreamer(videoid) {
@@ -267,6 +261,9 @@ module.exports = function(Vue, $){
       nextSong: function () {
         nextSong()
       },
+      prevSong: function () {
+        prevSong()
+      },
       shuffleStreamer: function () {
       	this.streamerQueue = shuffle(this.streamerQueue)
         saveQueue()
@@ -294,13 +291,15 @@ module.exports = function(Vue, $){
         }
       },
       removeStreamer: function (id) {
-        for (let i = 0; i < this.streamerQueue.length; i++) {
-          if (this.streamerQueue[i].id === id) {
-            this.streamerQueue.splice(i, 1)
-            saveQueue()
+        let tempQueue = JSON.parse(JSON.stringify(this.streamerQueue))
+        for (let i = 0; i < tempQueue.length; i++) {
+          if (tempQueue[i].id === id) {
+            tempQueue.splice(i, 1)
             break
           }
         }
+        this.streamerQueue = tempQueue
+        saveQueue()
       },
     },
   })

@@ -1,7 +1,7 @@
 {
 	"name": "KoalaBot",
 	"description": "A twitch chat bot",
-	"version": "2.0.0-alpha1",
+	"version": "2.0.0-alpha3",
 	"main": "app.html",
 	"dependencies": {
 		"express": "4.14.0",
@@ -15,5 +15,6 @@
 		"title": "KoalaBot",
 		"icon": "img/kb.png",
 		"frame": true
-	}
+	},
+  "chromium-args": "--enable-experimental-web-platform-features --disable-raf-throttling"
 }

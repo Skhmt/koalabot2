@@ -3,11 +3,12 @@
   node: true
 */
 
-module.exports = function(Vue, $){
+module.exports = function(Vue){
 
-  require('./chat.js')(Vue, $)
-  require('./music.js')(Vue, $)
-  require('./points.js')(Vue, $)
+  require('./chat.js')(Vue)
+  require('./music.js')(Vue)
+  require('./points.js')(Vue)
+  require('./tab.js')(Vue)
 
   let data = {
     navItems: [
@@ -38,15 +39,6 @@ module.exports = function(Vue, $){
       },
       changeTab: function (name) {
         this.currTab = name
-      },
-      fadeBeforeEnter: function (el) {
-        $(el).velocity('fadeOut', {duration: 0})
-      },
-      fadeEnter: function (el, done) {
-        $(el).velocity('transition.fadeIn', {delay: 180, duration: 160}, done)
-      },
-      fadeLeave: function (el, done) {
-        $(el).velocity('transition.fadeOut', {duration: 160}, done)
       },
     } // methods
   }) // Vue.component

@@ -1,32 +1,34 @@
-.container-fluid
-  .row
-    .col-sm-9(style="height: calc(100vh - 140px);")
-      //- chatbox
-      #chatPanel.panel.panel-default(style="height: 100%; padding: 0; overflow-y: scroll; overflow-x: hidden; word-wrap: break-word;")
-        .panel-body(style="padding: 0;")
-          .list-group
-            a.list-group-item.chatLine(v-for="line in chatLines", track-by="$index", v-html="line")
-    .col-sm-3(style="height: calc(100vh - 140px); padding-left: 5px; margin-left: 0px;")
-      //- userlist
-      .panel.panel-default(style="height: 100%;").noSelect
-        .panel-body
-          i.fa.fa-fw.fa-heart.text-danger
-          | &nbsp; &nbsp; {{ followers }}
-          br
-          i.fa.fa-fw.fa-user.text-info
-          | &nbsp; &nbsp; {{ watching }}
-          br
-          i.fa.fa-fw.fa-user-plus.text-primary
-          | &nbsp; &nbsp; {{ totalViews }}
-        .panel-body(v-html="userlist", style="overflow-y: auto; overflow-x: hidden; word-wrap: break-word;")
-  .row
-    .col-sm-12(style="height: 50px;")
-      //- Text input
-      br
-      form(v-on:submit.prevent="sendChat(selectChatBox, submitChatBox);")
-        .input-group.input-group-sm
-          .input-group-btn
-            select.btn.btn-default.noSelect(v-model="selectChatBox")
-              option(value="streamer") Streamer
-              option(value="bot") Bot
-          input.form-control.input-one#submitChatBox(type="text", placeholder="...", v-model="submitChatBox", autocomplete="off")
+.container
+  div(style="height: calc(100% - 60px); width: 100%; margin: 0; padding: 10px;")
+    //- chat 215px
+    .glass(style="height: 100%; width: calc(100% - 467px); padding: 0; margin: 0px;")
+      div#chatPanel(style="height: 100%; width: 100%; overflow-y: scroll; overflow-x: hidden; word-wrap: break-word;")
+        ul(style="list-style-type: none; margin: 0; padding: 0;")
+          li.chatLine(v-for="line in chatLines", track-by="$index", v-html="line", style="margin-top: 10px;")
+
+    //- userlist
+    .glass(style="height: 100%; width: 200px; padding: 0; margin: 0 0 0 9px;")
+      div(style="height: 65px; display: block; padding: 10px 10px 0 10px;")
+        i.fa.fa-fw.fa-heart
+        | &nbsp; &nbsp; {{ followers }}
+        br
+        i.fa.fa-fw.fa-user
+        | &nbsp; &nbsp; {{ watching }}
+        br
+        i.fa.fa-fw.fa-user-plus
+        | &nbsp; &nbsp; {{ totalViews }}
+      div(v-html="userlist", style="height: calc(100% - 75px); overflow-y: scroll; overflow-x: hidden; word-wrap: break-word; display: block; padding: 0 10px 0 10px")
+
+    //- events
+    .glass(style="height: 100%; width: 220px; padding: 0; margin: 0 0 0 9px;")
+      div(style="height: 100%; width: 100%; overflow-y: scroll; overflow-x: hidden; word-wrap: break-word; margin: 0;")
+        ul(style="list-style-type: none; margin: 0; padding: 0;")
+          li.eventLine(v-for="line in eventLines", track-by="$index", v-html="line", style="margin-top: 10px;")
+
+  //- input
+  div(style="height: 30px; padding: 0; margin: 0px 10px 0 10px;")
+    form(v-on:submit.prevent="sendChat(selectChatBox, submitChatBox);")
+      select(v-model="selectChatBox", style="width: 100px;")
+        option(value="streamer") Streamer
+        option(value="bot") Bot
+      input(type="text", placeholder="...", v-model="submitChatBox", autocomplete="off", style="width: calc(100% - 115px);")

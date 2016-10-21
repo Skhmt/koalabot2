@@ -13,8 +13,8 @@ let store = require('./lib/store')
 store.init(window, err => {
   if (err) console.error(err)
   else {
-    require('./view/login')(Vue, $)
-    require('./view/bot')(Vue, $)
+    require('./view/login')(Vue)
+    require('./view/bot')(Vue)
     require('./js/commands')
     setupVM()
   }
@@ -29,13 +29,13 @@ function setupVM() {
     },
     methods: {
       fadeBeforeEnter: function (el) {
-        $(el).velocity('fadeOut', {duration: 0})
+        Velocity(el, 'fadeOut', {duration: 0})
       },
       fadeEnter: function (el, done) {
-        $(el).velocity('transition.fadeIn', {delay: 180, duration: 160}, done)
+        Velocity(el, 'transition.fadeIn', {delay: 180, duration: 160}, done)
       },
       fadeLeave: function (el, done) {
-        $(el).velocity('transition.fadeOut', {duration: 160}, done)
+        Velocity(el, 'transition.fadeOut', {duration: 160}, done)
       },
     }
   })

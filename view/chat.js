@@ -4,12 +4,14 @@
   node: true
 */
 
-module.exports = function(Vue, $){
+module.exports = function(Vue){
 
   let store = require('../lib/store')
+  let window = store.window()
 
   let data = {
     chatLines: [],
+    eventLines: [],
     tapicStreamer: require('../lib/tapic-streamer'),
     tapicBot: require('../lib/tapic-bot'),
     followers: '',
@@ -26,50 +28,40 @@ module.exports = function(Vue, $){
   let emoticons = new Map()
   data.tapicStreamer.listen('raw', function (msg) {
     if (msg.substring(0,18) === ':tmi.twitch.tv 001') {
-      $.getJSON(
-    		`https://api.betterttv.net/2/channels/${data.tapicStreamer.getUsername()}`,
-    		{},
-    		function (response) {
-    			if ("emotes" in response) {
-    				for (var i in response.emotes) {
-    					emoticons.set(response.emotes[i].code, `https://cdn.betterttv.net/emote/${response.emotes[i].id}/1x`)
-    				}
-    			}
-          else console.error('Could not get BTTV channel emoticons.')
-    		}
-    	)
-      $.getJSON(
-    		'https://api.twitch.tv/kraken/chat/emoticons',
-    		{
-    			client_id: 'odxxxgp3cpbeuqybayvhwinz8zl0paf',
-    			api_version: 3
-    		},
-    		function(response) {
-    			if ('emoticons' in response) {
-    				for (let i in response.emoticons) {
-    					emoticons.set(response.emoticons[i].regex, response.emoticons[i].images[0].url)
-    				}
-    			}
-          else console.error('Could not get Twitch emoticons.')
-    		}
-    	)
-      $.getJSON(
-    		'https://api.betterttv.net/emotes',
-    		{},
-    		function (response) {
-    			if ("emotes" in response) {
-    				for (var i in response.emotes) {
-    					emoticons.set(response.emotes[i].regex, `https:${response.emotes[i].url}`)
-    				}
-    			}
-          else console.error('Could not get BTTV emoticons.')
-    		}
-    	)
+      let bttvurl = `https://api.betterttv.net/2/channels/${data.tapicStreamer.getUsername()}`
+      fetch(bttvurl).then(res => res.json()).then(res => {
+        if ("emotes" in res) {
+          for (let i in res.emotes) {
+            emoticons.set(res.emotes[i].code, `https://cdn.betterttv.net/emote/${res.emotes[i].id}/1x`)
+          }
+        }
+        else console.error('Could not get BTTV channel emoticons.')
+      })
+
+      let ttvurl = 'https://api.twitch.tv/kraken/chat/emoticons?client_id=odxxxgp3cpbeuqybayvhwinz8zl0paf&api_version=3'
+      fetch(ttvurl).then(res => res.json()).then(res => {
+        if ('emoticons' in res) {
+          for (let i in res.emoticons) {
+            emoticons.set(res.emoticons[i].regex, res.emoticons[i].images[0].url)
+          }
+        }
+        else console.error('Could not get Twitch emoticons.')
+      })
+
+      let bttv2url = 'https://api.betterttv.net/emotes'
+      fetch(bttv2url).then(res => res.json()).then(res => {
+        if ("emotes" in res) {
+          for (var i in res.emotes) {
+            emoticons.set(res.emotes[i].regex, `https:${res.emotes[i].url}`)
+          }
+        }
+        else console.error('Could not get BTTV emoticons.')
+      })
     }
   })
 
   function addChat(text) {
-    var $panel = $('#chatPanel')
+    let $panel = window.document.getElementById('chatPanel')
 
     // scrollHeight = element's total height including overflow
   	// clientHeight = element's height including padding excluding horizontal scroll bar
@@ -77,7 +69,7 @@ module.exports = function(Vue, $){
   	// allow 1px inaccuracy by adding 1
 
     // if it's scrolled to the bottom within 5px before a chat message shows up, set isScrolledToBottom to true
-    var isScrolledToBottom = $panel.prop("scrollHeight") - $panel.prop("clientHeight") <= $panel.prop("scrollTop") + 5
+    let isScrolledToBottom = $panel.scrollHeight - $panel.clientHeight <= $panel.scrollTop + 5
 
     // add message
     data.chatLines.push(text)
@@ -87,7 +79,7 @@ module.exports = function(Vue, $){
     if (isScrolledToBottom) {
       // $panel.prop("scrollTop", $panel.prop("scrollHeight") - $panel.prop("clientHeight"));
       setTimeout(function () {
-        $panel.prop("scrollTop", Number.MAX_SAFE_INTEGER)
+        $panel.scrollTop = Number.MAX_SAFE_INTEGER
       }, 50)
     }
   }
@@ -106,12 +98,15 @@ module.exports = function(Vue, $){
   function updateChatters() {
     let chatters = data.tapicStreamer.getChatters()
     let output = ''
+    const badgeurl = 'http://chat-badges.s3.amazonaws.com/'
 
     if (typeof chatters == 'undefined') return
 
     if (chatters.staff.length > 0) {
-        output += `<p> <b style="color: #C9F;">STAFF</b> &mdash;
-			<b>${chatters.staff.length.toLocaleString()}</b> <br> `
+        output += `<p>
+        <img src="${badgeurl}staff.png">
+        <b style="color: #C9F;">STAFF</b> &mdash;
+			  <b>${chatters.staff.length.toLocaleString()}</b> <br> `
         for (var i = 0; i < chatters.staff.length; i++) {
             let tempuser = chatters.staff[i]
             output += `${tempuser} <br> `
@@ -120,8 +115,10 @@ module.exports = function(Vue, $){
     }
 
     if (chatters.moderators.length > 0) {
-        output += `<p> <b style="color: #34ae0a;">MODS</b> &mdash;
-			<b>${chatters.moderators.length.toLocaleString()}</b> <br> `
+        output += `<p>
+        <img src="${badgeurl}mod.png">
+        <b style="color: #34ae0a;">MODS</b> &mdash;
+			  <b>${chatters.moderators.length.toLocaleString()}</b> <br> `
         for (let i = 0; i < chatters.moderators.length; i++) {
             let tempuser = chatters.moderators[i]
             output += `${tempuser} <br> `
@@ -130,8 +127,10 @@ module.exports = function(Vue, $){
     }
 
     if (chatters.admins.length > 0) {
-        output += `<p> <b style="color: #faaf19;">ADMINS</b> &mdash;
-			<b>${chatters.admins.length.toLocaleString()}</b> <br> `
+        output += `<p>
+        <img src="${badgeurl}admin.png">
+        <b style="color: #faaf19;">ADMINS</b> &mdash;
+			  <b>${chatters.admins.length.toLocaleString()}</b> <br> `
         for (let i = 0; i < chatters.admins.length; i++) {
             let tempuser = chatters.admins[i]
             output += `${tempuser} <br> `
@@ -140,8 +139,10 @@ module.exports = function(Vue, $){
     }
 
     if (chatters.global_mods.length > 0) {
-        output += `<p> <b style="color: #1a7026;">GLOBAL MODS</b> &mdash;
-			<b>${chatters.global_mods.length.toLocaleString()}</b> <br> `
+        output += `<p>
+        <img src="${badgeurl}globalmod.png">
+        <b style="color: #1a7026;">GLOBAL MODS</b> &mdash;
+			  <b>${chatters.global_mods.length.toLocaleString()}</b> <br> `
         for (let i = 0; i < chatters.global_mods.length; i++) {
             let tempuser = chatters.global_mods[i]
             output += `${tempuser} <br> `
@@ -150,8 +151,9 @@ module.exports = function(Vue, $){
     }
 
     if (chatters.viewers.length > 0) {
-        output += `<p> <b style="color: #3CF;">VIEWERS</b> &mdash;
-			<b>${chatters.viewers.length.toLocaleString()}</b> <br> `
+        output += `<p>
+        <b style="color: #3CF;">VIEWERS</b> &mdash;
+			  <b>${chatters.viewers.length.toLocaleString()}</b> <br> `
         for (let i = 0; i < chatters.viewers.length; i++) {
             let tempuser = chatters.viewers[i]
             output += `${tempuser} <br> `
@@ -182,22 +184,29 @@ module.exports = function(Vue, $){
   }
 
   // Listeners
-  data.tapicStreamer.listen('message', function (res) {
+  data.tapicBot.listen('message', function (res) {
     let message = res.text
     // sanitize
     message = message.replace('<', '&lt;').replace('(', '&#40;')
     // emoticons
     message = addEmoticons(message, emoticons)
 
-    let output = `${res.mod ? '<img src="http://chat-badges.s3.amazonaws.com/mod.png">' : ''}
-      ${res.sub ? '<img src="' + data.tapicStreamer.getSubBadgeUrl() + '">' : ''}
-      ${res.turbo ? '<img src="http://chat-badges.s3.amazonaws.com/turbo.png">' : ''}
-      <strong style="color: ${res.color};">
-        ${res.from}
-      </strong>
-      ${res.action ? '<span style="color: ' + res.color + ';">' : ':  '}
-        ${message}
-      ${res.action ? '</span>' : '' }`
+    let output = ''
+    const badgeurl = 'http://chat-badges.s3.amazonaws.com/'
+    const premiumurl = 'https://static-cdn.jtvnw.net/badges/v1/a1dd5073-19c3-4911-8cb4-c464a7bc1510/1'
+    if (res.badges.includes('broadcaster/1')) output += `<img src="${badgeurl}broadcaster.png">`
+    if (res.badges.includes('staff/1')) output += `<img src="${badgeurl}staff.png">`
+    if (res.badges.includes('admin/1')) output += `<img src="${badgeurl}admin.png">`
+    if (res.badges.includes('global_mod/1')) output += `<img src="${badgeurl}globalmod.png">`
+    if (res.badges.includes('moderator/1')) output += `<img src="${badgeurl}mod.png">`
+    if (res.badges.includes('subscriber/1')) output += `<img src="${data.tapicStreamer.getSubBadgeUrl()}">`
+    if (res.badges.includes('premium/1')) output += `<img src="${premiumurl}">`
+    if (res.badges.includes('turbo/1')) output += `<img src="${badgeurl}turbo.png">`
+
+    output += `&nbsp; <strong style="color: ${res.color};">${res.from}</strong>`
+    output += `${res.action ? '<span style="color: ' + res.color + ';">' : ':  '}
+    ${message}
+    ${res.action ? '</span>' : '' }`
     addChat(output)
   })
 
@@ -207,7 +216,7 @@ module.exports = function(Vue, $){
         ${res.from}
       </strong>
       <i class="fa fa-arrow-right"></i>
-      <strong style="color: ${data.tapicStreamer.getColor()}"> ${res.to} </strong> : ${res.text}`
+      <strong style="color: ${data.tapicStreamer.getColor()}">${res.to}</strong>: ${res.text}`
     addChat(output)
   })
 
@@ -217,16 +226,16 @@ module.exports = function(Vue, $){
         ${res.from}
       </strong>
       <i class="fa fa-arrow-right"></i>
-      <strong style="color: ${data.tapicBot.getColor()}"> ${res.to} </strong> : ${res.text}`
+      <strong style="color: ${data.tapicBot.getColor()}"> ${res.to} </strong>: ${res.text}`
     addChat(output)
   })
 
   data.tapicStreamer.listen('notice', function (res) {
-    let output = `* <em>${res}</em>`
-    addChat(output)
+    let output = `${res}`
+    data.eventLines.unshift(output);
   })
 
-  data.tapicStreamer.listen('echoChat', function (res) {
+  data.tapicBot.listen('echoChat', function (res) {
     // not echoing commands
     if (res.substring(0,1) === '/' || res.substring(0,1) === '.') return ''
 
@@ -236,7 +245,7 @@ module.exports = function(Vue, $){
     // emoticons
     message = addEmoticons(message, emoticons)
 
-    let output = `<img src="http://chat-badges.s3.amazonaws.com/broadcaster.png"> <strong style="color: ${data.tapicStreamer.getColor()};">${data.tapicStreamer.getDisplayName()}</strong> : ${message}`
+    let output = `<strong style="color: ${data.tapicBot.getColor()};">${data.tapicBot.getDisplayName()}</strong>: ${message}`
     addChat(output)
   })
 
@@ -249,7 +258,7 @@ module.exports = function(Vue, $){
 
     let output = `<strong style="color: ${data.tapicStreamer.getColor()}"> ${data.tapicStreamer.getUsername()} </strong>
     <i class="fa fa-arrow-right"></i>
-    <strong style="color: #6441A5;">${res.to}</strong> : ${message}`
+    <strong style="color: #6441A5;">${res.to}</strong>: ${message}`
     addChat(output)
   })
 
@@ -262,50 +271,50 @@ module.exports = function(Vue, $){
 
     let output = `<strong style="color: ${data.tapicBot.getColor()}"> ${data.tapicBot.getUsername()} </strong>
     <i class="fa fa-arrow-right"></i>
-    <strong style="color: #6441A5;">${res.to}</strong> : ${message}`
+    <strong style="color: #6441A5;">${res.to}</strong>: ${message}`
     addChat(output)
   })
 
   data.tapicStreamer.listen('host', function (res) {
-    addChat(`* <em>HOST: ${res}</em>`)
+    data.eventLines.unshift(`<strong>HOST</strong>: ${res}`)
   })
 
   data.tapicStreamer.listen('follow', function (res) {
-    addChat(`* <em>FOLLOW: ${res}</em>`)
+    data.eventLines.unshift(`<strong>FOLLOW</strong>: ${res}`)
   })
 
   data.tapicStreamer.listen('sub', function (res) {
-    addChat(`* <em>SUB: ${res}</em>`)
+    data.eventLines.unshift(`<strong>SUB</strong>: ${res}`)
   })
 
   data.tapicStreamer.listen('subMonths', function (res) {
-    let output = `* <em>RESUB: ${res.name} x${res.months}`
+    let output = `<strong>RESUB</strong>: ${res.name} x${res.months}`
     if (res.message) {
       output += `&nbsp; "${res.message}"`
     }
-    addChat(output + '</em>')
+    data.eventLines.unshift(output)
   })
 
   data.tapicStreamer.listen('subsAway', function (res) {
-    addChat(`* <em>${res} subscribers since you've last been on.</em>`)
+    data.eventLines.unshift(`${res} subscribers since you've last been on.`)
   })
 
   data.tapicStreamer.listen('clearChat', function () {
-    addChat(`* <em>Chat has been cleared.</em>`)
+    data.eventLines.unshift(`Chat has been cleared.`)
   })
 
   data.tapicStreamer.listen('clearUser', function (res) {
     const name = res.name
     const reason = res.reason
     const duration = res.duration
-    let output = `* <em>${name} has been `
+    let output = `${name} has been `
 
     if (duration) output += 'timed out'
     else output += 'banned'
 
     if (reason) output += ` for ${reason}`
-    output += '.</em>'
-    addChat(output)
+    output += '.'
+    data.eventLines.unshift(output)
   })
 
   Vue.component('chat', {

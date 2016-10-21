@@ -1,32 +1,26 @@
 <!-- app.html -->
 
 <!DOCTYPE html>
-<html style="padding: 0; margin: 0;">
+<html class="container">
 <head>
 	<title>
 		KoalaBot
 	</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
 
-	<script src="lib/jquery-3.1.0.min.js"></script>
-  <script src="lib/vue-2.0.0-rc8.js"></script>
-  <script src="lib/bootstrap-3.3.7.min.js"></script>
+  <script src="lib/vue-2.0.2.js"></script>
   <script src="lib/velocity-1.2.3.min.js"></script>
   <script src="lib/velocity.ui-5.0.4.js"></script>
-  <script src="lib/jquery.knob.min.js"></script>
 	<link rel="stylesheet" href="css/font-awesome-4.6.3.css">
-  <link rel="stylesheet" href="css/bootstrap.slone.css">
   <link rel="stylesheet" href="css/app.css">
 
 </head>
-<body style="padding: 0; margin: 0;">
+<body class="container" style="background-color: black;">
 
-  <div id="app" class="fillWindow">
+  <div id="app" class="container">
     <transition @before-enter="fadeBeforeEnter" @enter="fadeEnter" @leave="fadeLeave" :css="false">
       <login v-if="!loggedIn"></login>
-    </transition>
-    <transition @before-enter="fadeBeforeEnter" @enter="fadeEnter" @leave="fadeLeave" :css="false">
-      <bot v-show="loggedIn"></bot>
+      <bot v-else></bot>
     </transition>
   </div>
 
