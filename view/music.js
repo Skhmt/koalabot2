@@ -19,6 +19,8 @@ module.exports = function(Vue){
     duration: '00:00',
     streamerInput: '',
     requestInput: '',
+    blockScrub: false,
+    blockVol: false,
   }
 
   store.getItem('streamerQueue', (err, res) => {
@@ -48,11 +50,15 @@ module.exports = function(Vue){
       data.currentTime = secondsToMinutes(currentTime)
       data.duration = secondsToMinutes(duration)
 
-      const scrubWidth = (currentTime / duration) * window.document.getElementById('scrubContainer').clientWidth
-      window.document.getElementById('scrub').style.width = scrubWidth + 'px'
+      if (!data.blockScrub) {
+        const scrubWidth = (currentTime / duration) * window.document.getElementById('scrubContainer').clientWidth
+        window.document.getElementById('scrub').style.width = scrubWidth + 'px'
+      }
 
-      const volWidth = ytPlayer.getVolume() * 0.01 * window.document.getElementById('volumeContainer').clientWidth
-      window.document.getElementById('volume').style.width = volWidth + 'px'
+      if (!data.blockVol) {
+        const volWidth = ytPlayer.getVolume() * 0.01 * window.document.getElementById('volumeContainer').clientWidth
+        window.document.getElementById('volume').style.width = volWidth + 'px'
+      }
 
     } catch (e) {}
     window.requestAnimationFrame(songStateChecker)
@@ -120,21 +126,53 @@ module.exports = function(Vue){
     }
 
     let $vc = window.document.getElementById('volumeContainer')
-    $vc.addEventListener('click', e => {
+    $vc.addEventListener('mousedown', e => {
+      $vc.addEventListener('mousemove', volmove)
+    })
+    $vc.addEventListener('mouseup', e => {
+      $vc.removeEventListener('mousemove', volmove)
+      data.blockVol = false
       const pixelsFromLeft = e.pageX - $vc.offsetLeft
       const containerWidth = $vc.clientWidth
       const vol = Math.round( (pixelsFromLeft/containerWidth*100) )
       ytPlayer.setVolume(vol)
     })
+    $vc.addEventListener('mouseleave', e => {
+      data.blockVol = false
+      $vc.removeEventListener('mousemove', volmove)
+    })
+    function volmove(e) {
+      data.blockVol = true
+      const pixelsFromLeft = e.pageX - $vc.offsetLeft
+      window.requestAnimationFrame(() => {
+        window.document.getElementById('volume').style.width = pixelsFromLeft + 'px'
+      })
+    }
 
     let $sc = window.document.getElementById('scrubContainer')
-    $sc.addEventListener('click', e => {
+    $sc.addEventListener('mousedown', e => {
+      $sc.addEventListener('mousemove', scrubmove)
+    })
+    $sc.addEventListener('mouseup', e => {
+      $sc.removeEventListener('mousemove', scrubmove)
+      data.blockScrub = false
       const pixelsFromLeft = e.pageX - $sc.offsetLeft
       const containerWidth = $sc.clientWidth
       const scrubTimePercent = Math.round( (pixelsFromLeft/containerWidth*100) ) * 0.01
       const scrubTime = (scrubTimePercent * ytPlayer.getDuration())|0
       ytPlayer.seekTo(scrubTime, true)
     })
+    $sc.addEventListener('mouseleave', e => {
+      data.blockScrub = false
+      $sc.removeEventListener('mousemove', scrubmove)
+    })
+    function scrubmove(e) {
+      data.blockScrub = true
+      const pixelsFromLeft = e.pageX - $sc.offsetLeft
+      window.requestAnimationFrame(() => {
+        window.document.getElementById('scrub').style.width = pixelsFromLeft + 'px'
+      })
+    }
   }
 
   function nextSong() {

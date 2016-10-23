@@ -6,7 +6,7 @@
       div(style="width: 500px; height: calc(100% - 20px); display: inline-block; vertical-align: top; margin: 0; padding: 10px;")
         iframe#ytPlayer(src="", style="border: 0; padding: 0; margin: 0; width: 100%; height: 100%;")
       div(style="width: calc(100% - 530px); height: calc(100% - 20px); display: inline-block; vertical-align: top; margin: 0; padding: 10px 10px 10px 0;")
-        .glassTitle(style="text-overflow: ellipsis; overflow: hidden; white-space: nowrap; width: 100%; display: inline-block;", v-html="currentSong.title")
+        .glassTitle.noSelect(style="text-overflow: ellipsis; overflow: hidden; white-space: nowrap; width: 100%; display: inline-block;", v-html="currentSong.title")
         #scrubContainer.noSelect(style="width: 100%; height: 20px; display: block; background-color: rgba(50,50,50,0.9); box-shadow: 0 3px 5px rgba(0,0,0,1);")
           #scrub.noSelect(style="display: inline-block; height: 100%; background-color: rgba(30,120,256,1); margin: 0; padding: 0;")
         div(style="position: relative; margin: 5px 0 35px 0;")
@@ -23,33 +23,33 @@
   div(style="width: 100%; height: calc(100% - 320px); display: inline-block; vertical-align: top; margin: 0; padding: 0;")
     div(style="width: calc(50% - 20px); height: calc(100% - 20px); display: inline-block; vertical-align: top; margin: 0; padding: 10px;")
       div(style="margin: 0 0 25px 0;")
-        .glassTitle.noSelect(style="margin: 0;") Request queue
+        .glassTitle.noSelect(style="margin: 0; padding-top: 5px;") Request queue
         div(style="float:right;")
           input(v-model="requestInput", placeholder="youtube video id")
-          button(v-on:click="addRequest", style="padding: 7px;")
+          button(v-on:click="addRequest", style="padding: 6px 8px 6px 8px;")
             i.fa.fa-plus
-          button(v-on:click="shuffleRequest", style="padding: 7px;")
+          button(v-on:click="shuffleRequest", style="padding: 6px 8px 6px 8px;")
             i.fa.fa-random
-      .glass(style="width: 100%; height: calc(100% - 50px); margin: 0; padding: 0;")
+      .glass(style="width: 100%; height: calc(100% - 54px); margin: 0; padding: 0;")
         div(style="height: 100%; overflow-y: scroll; overflow-x: hidden; word-wrap: break-word;")
           transition-group(name="streamerQueue", tag="ul")
             li.streamerQueue(v-for="request in requestQueue", v-bind:key="request.id")
-              i.fa.fa-times-circle.fa-lg(v-on:click="removeRequest(request.id)")
+              i.fa.fa-times-circle.fa-lg.fa-btn(v-on:click="removeRequest(request.id)")
               | &nbsp;&nbsp;&nbsp;
               em(v-html="request.title")
     div(style="width: calc(50% - 20px); height: calc(100% - 20px); display: inline-block; vertical-align: top; margin: 0; padding: 10px;")
       div(style="margin: 0 0 25px 0;")
-        .glassTitle.noSelect(style="margin: 0;") Streamer queue
+        .glassTitle.noSelect(style="margin: 0; padding-top: 5px;") Streamer queue
         div(style="float:right;")
           input(v-model="streamerInput", placeholder="youtube video id")
-          button(v-on:click="addStreamer", style="padding: 7px;")
+          button(v-on:click="addStreamer", style="padding: 6px 8px 6px 8px;")
             i.fa.fa-plus
-          button(v-on:click="shuffleStreamer", style="padding: 7px;")
+          button(v-on:click="shuffleStreamer", style="padding: 6px 8px 6px 8px;")
             i.fa.fa-random
-      .glass(style="width: 100%; height: calc(100% - 50px); margin: 0; padding: 0;")
-        div(style="height: 100%; overflow-y: scroll; overflow-x: hidden; word-wrap: break-word;")
+      .glass(style="width: 100%; height: calc(100% - 54px); margin: 0; padding: 0;")
+        div(style="height: calc(100% - 10px); overflow-y: scroll; overflow-x: hidden; word-wrap: break-word; padding: 5px;")
           transition-group(name="streamerQueue", tag="ul")
             li.streamerQueue(v-for="song in streamerQueue", v-bind:key="song.id")
-              i.fa.fa-times-circle.fa-lg(v-on:click="removeStreamer(song.id)")
+              i.fa.fa-times-circle.fa-lg.fa-btn(v-on:click="removeStreamer(song.id)")
               | &nbsp;&nbsp;&nbsp;
               em(v-html="song.title")

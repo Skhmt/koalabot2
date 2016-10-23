@@ -1,7 +1,7 @@
 .container
   div(style="height: calc(100% - 60px); width: 100%; margin: 0; padding: 10px;")
     //- chat 215px
-    .glass(style="height: 100%; width: calc(100% - 467px); padding: 0; margin: 0px;")
+    .glass(style="height: 100%; width: calc(100% - 466px); padding: 0; margin: 0px;")
       div#chatPanel(style="height: 100%; width: 100%; overflow-y: scroll; overflow-x: hidden; word-wrap: break-word;")
         ul(style="list-style-type: none; margin: 0; padding: 0;")
           li.chatLine(v-for="line in chatLines", track-by="$index", v-html="line", style="margin-top: 10px;")
@@ -31,4 +31,4 @@
       select(v-model="selectChatBox", style="width: 100px;")
         option(value="streamer") Streamer
         option(value="bot") Bot
-      input(type="text", placeholder="...", v-model="submitChatBox", autocomplete="off", style="width: calc(100% - 115px);")
+      input(type="text", placeholder="...", v-model="submitChatBox", autocomplete="off", style="width: calc(100% - 114px);")

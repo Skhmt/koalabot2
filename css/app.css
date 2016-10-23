@@ -67,7 +67,7 @@ ul {
 button {
   padding: 10px;
   margin: 0;
-  border: 0;
+  border: 1px solid rgba(10,10,10,1);
   background-color: rgba(0,0,0,0.8);
   box-shadow: 0px 3px 7px rgba(0,0,0,1);
   color: rgba(240,240,240,1);
@@ -83,16 +83,6 @@ button.disabled, button.disabled:hover, button.disabled:active {
   background-color: rgba(30,30,30,0.8);
   color: rgba(240,240,240,1);
   box-shadow: 0 0 0;
-}
-
-i.fa-btn {
-  text-shadow: 0 3px 5px rgba(0,0,0,1);
-}
-i.fa-btn:hover, i.fa-btn:active {
-  color: rgba(30,120,256,1);
-}
-i.fa-btn:active {
-  text-shadow: 0 0 0;
 }
 
 hr {
@@ -149,6 +139,21 @@ select, input {
   padding: 5px;
 }
 
+select {
+  height: 28px;
+}
+
+i.fa-btn {
+  text-shadow: 0 3px 5px rgba(0,0,0,1);
+  display: inline-block;
+}
+i.fa-btn:hover, i.fa-btn:active {
+  color: rgba(30,120,256,1);
+}
+i.fa-btn:active {
+  text-shadow: 0 0 0;
+}
+
 .chatLine {
   padding: 0 10px 5px 10px;
   margin: 0;
@@ -164,7 +169,7 @@ select, input {
 }
 
 ::-webkit-scrollbar { width: 10px; }
-::-webkit-scrollbar-track { background-color: rgba(100,100,100,0.8); }
+::-webkit-scrollbar-track { background-color: rgba(100,100,100,0); }
 ::-webkit-scrollbar-thumb {
   background-color: rgba(240,240,240,1);
   box-shadow: 3px 3px 5px rgba(0,0,0,1);

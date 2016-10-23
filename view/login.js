@@ -88,6 +88,8 @@ module.exports = function(Vue){
           })
         })
         app.get('/cancel/', function(req, res) {
+          window.document.getElementById('streamerLoginFrame').src = ''
+          window.document.getElementById('botLoginFrame').src = ''
           _this.showStreamerLogin = false
           _this.showBotLogin = false
           res.send('OK')
@@ -113,9 +115,9 @@ module.exports = function(Vue){
         const path = 'https://api.twitch.tv/kraken/oauth2/authorize'
         const scope = 'channel_editor+chat_login+channel_commercial'
         const redirect_uri = 'http://localhost:3000/bot.html'
-        const url = `${path}?response_type=token&client_id=${this.clientidbot}&redirect_uri=${redirect_uri}&scope=${scope}&force_verify=true`;
+        const url = `${path}?response_type=token&client_id=${this.clientidbot}&redirect_uri=${redirect_uri}&scope=${scope}&force_verify=true`
 
-        let $login = window.document.getElementById('botLoginFrame');
+        let $login = window.document.getElementById('botLoginFrame')
         if ($login.src != url) $login.src = url
         this.showBotLogin = true
       },

@@ -9,6 +9,8 @@ module.exports = function(Vue){
   require('./music.js')(Vue)
   require('./points.js')(Vue)
   require('./tab.js')(Vue)
+  let store = require('../lib/store')
+  let window = store.window()
 
   let data = {
     navItems: [
@@ -27,12 +29,33 @@ module.exports = function(Vue){
     ],
     currTab: 'Chat',
     iconNav: true,
+    bindbg: '',
+    bindbgAngle1: 120,
+    bindbgAngle2: 0,
+    bindbgAngle3: 240,
+    bindbgAnimate: true,
   }
+
+  window.requestAnimationFrame(setBG)
+  function setBG() {
+    const speed = 0.5
+    data.bindbgAngle1 = (data.bindbgAngle1 + speed) % 360
+    data.bindbgAngle2 = (data.bindbgAngle2 + speed) % 360
+    data.bindbgAngle3 = (data.bindbgAngle3 + speed) % 360
+    data.bindbg = 'background: ' +
+      `linear-gradient(${data.bindbgAngle1}deg, LightSkyBlue, transparent),` +
+      `linear-gradient(${data.bindbgAngle2}deg, Orchid, transparent), ` +
+      `linear-gradient(${data.bindbgAngle3}deg, Khaki, transparent); ` +
+      'background-blend-mode: multiply; ' +
+      'box-shadow: inset 0px 0px 300px 10px rgba(0,0,0,0.8);'
+    if (data.bindbgAnimate) window.requestAnimationFrame(setBG)
+  }
+
 
 
   Vue.component('bot', {
     template: require('pug').renderFile('./view/bot.pug'),
-    data: function () { return data; },
+    data: () => data,
     methods: {
       isTab: function(name) {
         return this.currTab === name
