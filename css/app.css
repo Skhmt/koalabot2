@@ -19,13 +19,31 @@
   /*box-shadow: inset 0px 0px 60px 30px rgba(0,0,0,0.8);*/
 }
 
-.noSelect, button, nav,.fa-btn {
+.noSelect, button, nav, .fa-btn {
   -webkit-user-select: none;
   cursor: default;
+  -webkit-user-drag: none;
 }
 
 .selectable {
   -webkit-user-select: text;
+}
+
+#spinner {
+  border: 14px solid rgba(0,0,0,0);
+  border-top: 14px solid rgba(0,0,0,0.6);
+  border-radius: 50%;
+  width: 80px;
+  height: 80px;
+  animation: spin 0.4s linear infinite;
+  position: absolute;
+  top: calc(50vh - 54px);
+  left: calc(50vw - 54px);
+  z-index: 9999;
+}
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
 }
 
 nav {

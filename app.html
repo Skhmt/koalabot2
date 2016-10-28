@@ -9,18 +9,30 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
 
   <script src="lib/vue-2.0.2.js"></script>
-  <script src="lib/velocity-1.2.3.min.js"></script>
-  <script src="lib/velocity.ui-5.0.4.js"></script>
+  <script src="lib/velocity-1.3.1.min.js"></script>
+  <script src="lib/velocity.ui-5.1.1.js"></script>
 	<link rel="stylesheet" href="css/font-awesome-4.6.3.css">
   <link rel="stylesheet" href="css/app.css">
 
 </head>
-<body class="container" style="background-color: black;">
+<body class="container" style="background: linear-gradient(-45deg,LightSkyBlue,transparent),
+linear-gradient(45deg,Orchid,transparent),
+linear-gradient(Khaki,transparent);
+background-blend-mode: multiply;
+box-shadow: inset 0px 0px 300px 10px rgba(0,0,0,0.8);">
+
+  <div id="spinner"></div>
 
   <div id="app" class="container">
-    <transition @before-enter="fadeBeforeEnter" @enter="fadeEnter" @leave="fadeLeave" :css="false">
-      <login v-if="!loggedIn"></login>
-      <bot v-else></bot>
+    <transition @before-enter="loginBeforeEnter" @enter="loginEnter" @leave="loginLeave" :css="false">
+      <div v-if="loggedIn == false" style="width: 100%; height: 100%;">
+        <login></login>
+      </div>
+    </transition>
+    <transition @before-enter="loginBeforeEnter" @enter="loginEnter" @leave="loginLeave" :css="false">
+      <div v-if="loggedIn == true" style="width: 100%; height: 100%;">
+        <bot></bot>
+      </div>
     </transition>
   </div>
 

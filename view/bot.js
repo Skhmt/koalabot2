@@ -38,7 +38,7 @@ module.exports = function(Vue){
 
   window.requestAnimationFrame(setBG)
   function setBG() {
-    const speed = 0.5
+    const speed = 0.75
     data.bindbgAngle1 = (data.bindbgAngle1 + speed) % 360
     data.bindbgAngle2 = (data.bindbgAngle2 + speed) % 360
     data.bindbgAngle3 = (data.bindbgAngle3 + speed) % 360

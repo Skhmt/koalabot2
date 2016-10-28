@@ -3,6 +3,7 @@
   node: true
 */
 
+document.getElementById('app').style.display = 'none'
 // song request server
 let express = require('express')
 let app = express()
@@ -16,6 +17,8 @@ store.init(window, err => {
     require('./view/login')(Vue)
     require('./view/bot')(Vue)
     require('./js/commands')
+    document.getElementById('spinner').style.display = 'none'
+    document.getElementById('app').style.display = ''
     setupVM()
   }
 })
@@ -28,14 +31,14 @@ function setupVM() {
       loggedIn: false
     },
     methods: {
-      fadeBeforeEnter: function (el) {
+      loginBeforeEnter: function (el) {
         Velocity(el, 'fadeOut', {duration: 0})
       },
-      fadeEnter: function (el, done) {
-        Velocity(el, 'transition.fadeIn', {delay: 180, duration: 160}, done)
+      loginEnter: function (el, done) {
+        Velocity(el, 'transition.fadeIn', {delay:210, duration: 200}, done)
       },
-      fadeLeave: function (el, done) {
-        Velocity(el, 'transition.fadeOut', {duration: 160}, done)
+      loginLeave: function (el, done) {
+        Velocity(el, 'transition.fadeOut', {duration: 200}, done)
       },
     }
   })
@@ -56,12 +59,12 @@ function getIP () {
   var interfaces = os.networkInterfaces()
   var addresses = []
   for (var k in interfaces) {
-      for (var k2 in interfaces[k]) {
-          var address = interfaces[k][k2]
-          if (address.family  === 'IPv4' && !address.internal) {
-              addresses.push(address.address)
-          }
+    for (var k2 in interfaces[k]) {
+      var address = interfaces[k][k2]
+      if (address.family  === 'IPv4' && !address.internal) {
+          addresses.push(address.address)
       }
+    }
   }
 
   return addresses[0]

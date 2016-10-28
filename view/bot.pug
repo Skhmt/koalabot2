@@ -1,5 +1,4 @@
-//- .fillWindow(style="background-image: url('../img/colors.jpg');")
-.fillWindow(v-bind:style="bindbg")
+.fillWindow.noSelect(v-bind:style="bindbg")
   nav(style="height: 38px;")
     ul
       li(v-for="item in navItems", v-bind:class="isTab(item.name) ? 'activeTab' : ''", v-on:click="changeTab(item.name)")

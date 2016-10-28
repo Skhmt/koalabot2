@@ -125,25 +125,21 @@ module.exports = function(Vue){
       }
     }
 
+    let $body = window.document.getElementsByTagName('body')[0]
+
     let $vc = window.document.getElementById('volumeContainer')
     $vc.addEventListener('mousedown', e => {
-      $vc.addEventListener('mousemove', volmove)
+      data.blockVol = true
+      volMove(e)
+      $body.addEventListener('mousemove', volMove)
     })
-    $vc.addEventListener('mouseup', e => {
-      $vc.removeEventListener('mousemove', volmove)
-      data.blockVol = false
-      const pixelsFromLeft = e.pageX - $vc.offsetLeft
+    function volMove(e) {
+      let pixelsFromLeft = e.pageX - $vc.offsetLeft
       const containerWidth = $vc.clientWidth
+      if (pixelsFromLeft > containerWidth) pixelsFromLeft = containerWidth
+      else if (pixelsFromLeft < 0) pixelsFromLeft = 0
       const vol = Math.round( (pixelsFromLeft/containerWidth*100) )
       ytPlayer.setVolume(vol)
-    })
-    $vc.addEventListener('mouseleave', e => {
-      data.blockVol = false
-      $vc.removeEventListener('mousemove', volmove)
-    })
-    function volmove(e) {
-      data.blockVol = true
-      const pixelsFromLeft = e.pageX - $vc.offsetLeft
       window.requestAnimationFrame(() => {
         window.document.getElementById('volume').style.width = pixelsFromLeft + 'px'
       })
@@ -151,28 +147,42 @@ module.exports = function(Vue){
 
     let $sc = window.document.getElementById('scrubContainer')
     $sc.addEventListener('mousedown', e => {
-      $sc.addEventListener('mousemove', scrubmove)
-    })
-    $sc.addEventListener('mouseup', e => {
-      $sc.removeEventListener('mousemove', scrubmove)
-      data.blockScrub = false
-      const pixelsFromLeft = e.pageX - $sc.offsetLeft
-      const containerWidth = $sc.clientWidth
-      const scrubTimePercent = Math.round( (pixelsFromLeft/containerWidth*100) ) * 0.01
-      const scrubTime = (scrubTimePercent * ytPlayer.getDuration())|0
-      ytPlayer.seekTo(scrubTime, true)
-    })
-    $sc.addEventListener('mouseleave', e => {
-      data.blockScrub = false
-      $sc.removeEventListener('mousemove', scrubmove)
-    })
-    function scrubmove(e) {
       data.blockScrub = true
-      const pixelsFromLeft = e.pageX - $sc.offsetLeft
+      scrubMove(e)
+      $body.addEventListener('mousemove', scrubMove)
+    })
+    function scrubMove(e) {
+      let pixelsFromLeft = e.pageX - $sc.offsetLeft
+      const containerWidth = $sc.clientWidth
+      if (pixelsFromLeft > containerWidth) pixelsFromLeft = containerWidth
+      else if (pixelsFromLeft < 0) pixelsFromLeft = 0
       window.requestAnimationFrame(() => {
         window.document.getElementById('scrub').style.width = pixelsFromLeft + 'px'
       })
     }
+
+    $body.addEventListener('mouseup', e => {
+      if (data.blockVol) {
+        $body.removeEventListener('mousemove', volMove)
+        let pixelsFromLeft = e.pageX - $vc.offsetLeft
+        const containerWidth = $vc.clientWidth
+        if (pixelsFromLeft > containerWidth) pixelsFromLeft = containerWidth
+        else if (pixelsFromLeft < 0) pixelsFromLeft = 0
+        const vol = Math.round( (pixelsFromLeft/containerWidth*100) )
+        ytPlayer.setVolume(vol)
+        window.requestAnimationFrame(() => data.blockVol = false)
+      } else if (data.blockScrub) {
+        $body.removeEventListener('mousemove', scrubMove)
+        let pixelsFromLeft = e.pageX - $sc.offsetLeft
+        const containerWidth = $sc.clientWidth
+        if (pixelsFromLeft > containerWidth) pixelsFromLeft = containerWidth
+        else if (pixelsFromLeft < 0) pixelsFromLeft = 0
+        const scrubTimePercent = Math.round( (pixelsFromLeft/containerWidth*100) ) * 0.01
+        const scrubTime = (scrubTimePercent * ytPlayer.getDuration())|0
+        ytPlayer.seekTo(scrubTime, true)
+        window.requestAnimationFrame(() => data.blockScrub = false)
+      }
+    })
   }
 
   function nextSong() {

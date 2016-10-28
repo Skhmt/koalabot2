@@ -1,4 +1,4 @@
-.fillWindow.noSelect(style="background: linear-gradient(-45deg,LightSkyBlue,transparent), linear-gradient(45deg,Orchid,transparent), linear-gradient(Khaki,transparent); background-blend-mode: multiply; box-shadow: inset 0px 0px 300px 10px rgba(0,0,0,0.8);")
+.fillWindow.noSelect
   .glass(style="width: 40vw; margin-left: 30vw; margin-top: 80px;")
     div(style="text-align: center;")
       //- img(src="./img/kb.png", style="width: 200px; height: 200px;")
@@ -8,14 +8,14 @@
 
     div(style="margin-top: 10px;")
       div(v-on:click="streamerLogin", style="width: 50%; display: inline-block;")
-        img.loginPicture(v-bind:src="streamerPicture", draggable="false")
+        img.loginPicture.noSelect(v-bind:src="streamerPicture")
       div(style="width: 50%; display: inline-block; vertical-align: top;")
         h4 Streamer Account
         h5 {{ streamerName }}
 
     div(style="margin-top: 10px;")
       div(v-on:click="botLogin", style="width: 50%; display: inline-block;")
-        img.loginPicture(v-bind:src="botPicture", draggable="false")
+        img.loginPicture.noSelect(v-bind:src="botPicture")
       div(style="width: 50%; display: inline-block; vertical-align: top;")
         h4 Bot Account
         h5 {{ botName }}
@@ -28,10 +28,8 @@
 
   transition(v-on:before-enter="fadeBeforeEnter", v-on:enter="fadeEnter", v-on:leave="fadeLeave", v-bind:css="false")
     div(v-show="showStreamerLogin", v-on:click="showStreamerLogin = false", style="width: 100%; height: 100%; background-color: rgba(0,0,0,0.9); position: absolute; top: 0; left: 0; z-index: 9001;")
-      //- iframe#twitchLoginFrame(src="", style="outline: none; left: 20vw; top: 25px; width: 60vw; height: 730px; margin: 0; padding: 0; border: 0; position: absolute; z-index: 9001;", nwfaketop)
       iframe#streamerLoginFrame(src="", style="outline: none; width: 60vw; height: 730px; margin-left: 20vw; margin-top: 25px; padding: 0; border: 0;", nwfaketop)
 
   transition(v-on:before-enter="fadeBeforeEnter", v-on:enter="fadeEnter", v-on:leave="fadeLeave", v-bind:css="false")
     div(v-show="showBotLogin", v-on:click="showBotLogin = false", style="width: 100%; height: 100%; background-color: rgba(0,0,0,0.9); position: absolute; top: 0; left: 0; z-index: 9001;")
-      //- iframe#twitchLoginFrame(src="", style="outline: none; left: 20vw; top: 25px; width: 60vw; height: 730px; margin: 0; padding: 0; border: 0; position: absolute; z-index: 9001;", nwfaketop)
       iframe#botLoginFrame(src="", style="outline: none; width: 60vw; height: 730px; margin-left: 20vw; margin-top: 25px; padding: 0; border: 0;", nwfaketop)
