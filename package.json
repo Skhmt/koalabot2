@@ -6,7 +6,7 @@
 	"dependencies": {
 		"express": "4.14.0",
 		"body-parser": "1.14.2",
-		"ws": "1.1.0",
+		"ws": "7.2.0",
     "pug": "2.0.0-beta3"
 	},
 	"window": {
